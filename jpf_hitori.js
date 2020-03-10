@@ -50,40 +50,120 @@
 var allCells;
 
 window.onload = startUp();
+// runs when window opens
 
 function startUp(){
+   var puzzleButtons = document.getElementsByClassName("puzzles");
+   
    document.getElementById("puzzleTitle").innerHTML = "Puzzle 1";
    document.getElementById("puzzle").innerHTML = drawHitori(hitori1Numbers, hitori1Blocks, hitori1Rating);
    
-   var puzzleButtons = document.getElementsByClassName("puzzles");
 
-   for(var i = 0; i <= puzzleButtons; i++){
+   for(var i = 0; i < puzzleButtons.length; i++){
       puzzleButtons[i].onclick = switchPuzzle;
    }
 
    setupPuzzle();
+   // creates the puzzle
 
    document.getElementById("check").addEventListener("click", findErrors);
+   // shows errors if you click the button
    document.getElementById("solve").addEventListener("click", showSolution);
+   // shows the solution if you click the button
 }
 
 function switchPuzzle(e){
-   var puzzleID = e.target.id;
-   document.getElementById("puzzleTitle").innerHTML = e.target.value;
+   // changes the puzzle to 1, 2, or 3
+   if(confirm("YOU WILL LOSE ALL PROGRESS... continue?")){
+      var puzzleID = e.target.id;
+      // gets the buttons id
+      document.getElementById("puzzleTitle").innerHTML = e.target.value;
+      // gets the buttons value
 
-   switch(puzzleID){
-      case "puzzle1":
-         drawHitori(hitori1Numbers, hitori1Blocks, hitori1Rating);
-      case "puzzle2":
-         drawHitori(hitori2Numbers, hitori2Blocks, hitori2Rating);
-      case "puzzle3":
-         drawHitori(hitori3Numbers, hitori3Blocks, hitroi3Rating);
+      switch(puzzleID){
+         case "puzzle1":
+            // changes to puzzle 1
+            document.getElementById("puzzle").innerHTML = drawHitori(hitori1Numbers, hitori1Blocks, hitori1Rating);
+            break;
+         case "puzzle2":
+            // changes to puzzle 2
+            document.getElementById("puzzle").innerHTML = drawHitori(hitori2Numbers, hitori2Blocks, hitori2Rating);
+            break;   
+         case "puzzle3":
+            // changes to puzzle 3
+            document.getElementById("puzzle").innerHTML = drawHitori(hitori3Numbers, hitori3Blocks, hitori3Rating);
+            break;
+      }
+
+      setupPuzzle();
    }
-
-   setupPuzzle();
-   
 }
-         
+
+function setupPuzzle(){
+   allCells = document.querySelectorAll("table#hitoriGrid td");
+   
+   for(var i = 0; i < allCells.length; i++){
+      allCells[i].style.backgroundColor = "white";
+      // makes the background white
+      allCells[i].style.color = "black";
+      // makes cell font black
+      allCells[i].style.borderRadius = "0";
+      // makes cell radius 0
+   
+      allCells[i].addEventListener("mousedown",
+      function(e){
+         if(e.shiftKey){
+            // changes background color to white, font to black, radius to 0
+            e.target.style.backgroundColor = "white";
+            e.target.style.color = "black"
+            e.target.style.borderRadius = "0px";
+         }else if(e.altKey){
+            // changes background to black, font to white, radius to 0
+            e.target.style.backgroundColor = "black";
+            e.target.style.color = "white";
+            e.target.style.borderRadius = "0px";
+         }else{ 
+            // changes background to grey, font to white, radius to 50%
+            e.target.style.backgroundColor = "rgb(101, 101, 101)";
+            e.target.style.color = "white";
+            e.target.style.borderRadius = "50%";
+         }
+         // 7c.iv
+         e.preventDefault();
+      })
+      allCells[i].addEventListener("mouseover", 
+      // changes cursor based on what mod key is pressed
+      function(e){
+         if(e.shiftKey){
+            e.target.style.cursor = "url(jpf_eraser.png), alias";
+         }else if(e.altKey){
+            e.target.style.cursor = "url(jpf_block.png), cell";
+         }else{ 
+            e.target.style.cursor = "url(jpf_circle.png), pointer";
+         }
+      })
+      allCells[i].addEventListener("mouseup", checkSolution);
+   }
+}
+
+function findErrors(){
+   // checks for which cells are correct, and highlights them, before changing back
+   for(var i = 0; i < allCells.length; i++){
+      if((allCells[i].className === "blocks" && allCells[i].style.backgroundColor === "rgb(101, 101, 100)")
+      ||
+      (allCells[i].className === "circles" && allCells[i].style.backgroundColor === "black")){
+         allCells[i].style.color = "red";
+      }
+   }
+   setTimeout(function(){
+      for(var i = 0; i < allCells.length; i++){
+         if(allCells[i].style.color === "red"){
+            allCells[i].style.color = "white";
+         }
+
+      }
+   }, 1000)
+}
 /* ================================================================= */
 
 function checkSolution() {
